@@ -3,11 +3,9 @@
   "rules": [
     {
       "domain_suffix": [
-        "galaxyappstore.com",
-        "apps.razer.com",
-        "client.wns.windows.com",
-        "duse1.com",
-        "duse2.com"
+        "2048.info",
+        "av01.media",
+        "iw01.xyz"
       ]
     }
   ]
