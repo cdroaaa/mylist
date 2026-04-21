@@ -3,12 +3,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "2048.info",
-        "av01.media",
-        "av01.xyz",
-        "iw01.xyz",
-        "apkpures.xyz",
-        "cdnpure.com"
+        "galaxyappstore.com",
+        "testingcf.jsdelivr.net"
+        "duse1.com",
+        "duse2.com"
       ]
     }
   ]
