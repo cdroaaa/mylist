@@ -4,7 +4,8 @@
     {
       "domain_suffix": [
         "galaxyappstore.com",
-        "testingcf.jsdelivr.net"
+        "jsdelivr.net",
+        "jsdelivr.com",
         "duse1.com",
         "duse2.com"
       ]
