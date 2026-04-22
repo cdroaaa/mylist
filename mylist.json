@@ -1,12 +1,12 @@
 {
-  "version": 3,
+  "version": 2,
   "rules": [
     {
       "domain_suffix": [
-        "av01.media",
-        "av01.xyz",
-        "iw01.xyz",
-        "2048.info"
+        "galaxyappstore.com",
+        "client.wns.windows.com",
+        "apps.razer.com",
+        "duse1.com"
       ]
     }
   ]
