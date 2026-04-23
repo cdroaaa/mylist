@@ -3,7 +3,10 @@
   "rules": [
     {
       "domain_suffix": [
-        "services.googleapis.cn"
+        "services.googleapis.cn",
+        "iw01.xyz",
+        "av01.media",
+        "2048.info"
       ]
     }
   ]
