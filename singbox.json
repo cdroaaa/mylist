@@ -5,7 +5,8 @@
       "domain_suffix": [
         "galaxyappstore.com",
         "client.wns.windows.com",
-        "apps.razer.com"
+        "apps.razer.com",
+        "services.googleapis.cn"
       ],
       "domain_keyword":[
         "duse",
