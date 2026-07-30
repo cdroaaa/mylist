@@ -1,0 +1,98 @@
+{
+  "log": {
+    "level": "error"
+  },
+  "dns": {
+    "servers": [
+      {"type": "fakeip","tag": "Fake-IP","inet4_range": "198.18.0.0/15","inet6_range": "fc00::/18"},
+      {"type": "udp","tag": "Alidns","server": "223.5.5.5","server_port": 53},
+      {"type": "https","tag": "Local-DNS","domain_resolver": "Alidns","server": "dns.alidns.com","path": "/dns-query"},
+      {"type": "https","tag": "Remote-DNS","detour": "🚀 节点选择","domain_resolver": "Alidns","server": "dns.google","path": "/dns-query"}
+    ],
+    "rules": [
+      {"outbound": "any","server": "localDns"},
+      {"clash_mode": "direct","server": "Local-DNS"},
+      {"clash_mode": "global","server": "Remote-DNS"},
+      {"rule_set": ["custon","geosite"],"server": "Local-DNS"},
+      {"type": "logical","mode": "and",
+        "rules": [
+          {"domain_suffix": [".lan",".localdomain",".example",".invalid",".localhost",".test",".local",".home.arpa",".msftconnecttest.com",".msftncsi.com"],"invert": true},
+          {"query_type": ["A","AAAA"]}
+        ],
+        "server": "Fake-IP"
+      },
+      {"rule_set": ["github","google","gfw"],"server": "Remote-DNS"}
+    ],
+    "final": "Remote-DNS",
+    "strategy": "ipv4_only"
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "interface_name": "singtun0",
+      "address": ["172.19.0.0/30","fdfe:dcba:9876::/126"],
+      "auto_route": true,
+      "stack": "mixed",
+      "platform": {"http_proxy": {"enabled": true,"server": "127.0.0.1","server_port": 7890}},
+      "sniff": true,
+      "sniff_override_destination": true
+    },
+    {"type": "mixed","listen": "127.0.0.1","listen_port": 7890},
+    {"type": "direct","tag": "dns-in","listen": "::","listen_port": 6053},
+    {"type": "redirect","tag": "redirect-in","listen": "::","listen_port": 6054},
+    {"type": "tproxy","tag": "tproxy-in","listen": "::","listen_port": 6055,"udp_fragment": true}
+  ],
+  "outbounds": [
+    {"type": "selector","tag": "🚀 节点选择","outbounds": ["🎈 自动选择"],"interrupt_exist_connections": true},
+    {"type": "urltest","tag": "🎈 自动选择","outbounds": [],"url": "https://www.gstatic.com/generate_204","interval": "3m0s","tolerance": 150,"interrupt_exist_connections": true},
+    {"type": "selector","tag": "🍀 custon","outbounds": ["direct"],"interrupt_exist_connections": true},
+    {"type": "selector","tag": "🕹️ github","outbounds": ["🚀 节点选择"],"interrupt_exist_connections": true},
+    {"type": "selector","tag": "📢 google","outbounds": ["🚀 节点选择"],"interrupt_exist_connections": true},
+    {"type": "selector","tag": "🌍 gfw","outbounds": ["🚀 节点选择"],"interrupt_exist_connections": true},
+    {"type": "selector","tag": "🐟 漏网之鱼","outbounds": ["🚀 节点选择"],"interrupt_exist_connections": true},
+    {"type": "selector","tag": "GLOBAL","outbounds": ["direct","🚀 节点选择"],"interrupt_exist_connections": true},
+    {"type": "direct","tag": "direct"},
+    {"type": "block","tag": "block"}
+  ],
+  "route": {
+    "rules": [
+      {"action": "sniff","inbound": ["tun-in","dns-in","redirect-in","tproxy-in"]},
+      {"action": "hijack-dns","type": "logical","mode": "or","rules": [{"port": 53},{"protocol": "dns"}]},
+      {"action": "route","clash_mode": "direct","outbound": "direct"},
+      {"action": "route","clash_mode": "global","outbound": "GLOBAL"},
+      {"action": "route","network": "icmp","outbound": "direct"},
+      {"action": "reject","protocol": ["quic","bittorrent"]},
+      {"action": "reject","network": "udp","port":443},
+      {"action": "reject","rule_set": "Ads"},
+      {"action": "route","rule_set": "custon","outbound": "🍀 custon"},
+      {"action": "route","rule_set": "google","outbound": "📢 google"},
+      {"action": "route","rule_set": "github","outbound": "🕹️ github"},
+      {"action": "route","rule_set": "gfw","outbound": "🌍 gfw"},
+      {"action": "route","rule_set": "geosite","outbound": "direct"},
+      {"action": "route","rule_set": "geoip","outbound": "direct"}
+    ],
+    "rule_set": [
+      {"type": "remote","tag": "Ads","url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/category-ads-all.srs","download_detour": "direct","update_interval": "24h"},
+      {"type": "remote","tag": "custon","url": "https://testingcf.jsdelivr.net/gh/cdroaaa/mylist@master/singbox.json","download_detour": "direct","update_interval": "24h"},
+      {"type": "remote","tag": "geosite","url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/cn.srs","download_detour": "direct","update_interval": "24h"},
+      {"type": "remote","tag": "geoip","url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geoip/cn.srs","download_detour": "direct","update_interval": "24h"},
+      {"type": "remote","tag": "github","url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/github.srs","download_detour": "direct","update_interval": "24h"},
+      {"type": "remote","tag": "google","url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/google.srs","download_detour": "direct","update_interval": "24h"},
+      {"type": "remote","tag": "gfw","url": "https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@sing/geo/geosite/geolocation-!cn.srs","download_detour": "direct","update_interval": "24h"}
+    ],
+    "final": "🐟 漏网之鱼",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "Local-DNS"
+  },
+  "experimental": {
+    "cache_file": {"enabled": true,"path": "cache.db","store_fakeip": true,"rdrc_timeout": "72h"},
+    "clash_api": {
+      "external_controller": "0.0.0.0:9999",
+      "external_ui_download_url": "https://github.com/Zephyruso/zashboard/archive/gh-pages.zip",
+      "external_ui_download_detour": "🚀 节点选择",
+      "default_mode": "rule",
+      "access_control_allow_origin": "*"
+    }
+  }
+}
