@@ -1,0 +1,173 @@
+{
+    "dns": {
+        "servers": [
+            {
+                "type": "tcp",
+                "tag": "dns_proxy",
+                "server": "1.1.1.1",
+                "detour": "🚀 节点选择",
+                "domain_resolver": "dns_resolver"
+            },
+            {
+                "type": "https",
+                "tag": "dns_direct",
+                "server": "dns.alidns.com",
+                "domain_resolver": "dns_resolver"
+            },
+            {
+                "type": "udp",
+                "tag": "dns_resolver",
+                "server": "223.5.5.5"
+            },
+            {
+                "type": "fakeip",
+                "tag": "dns_fakeip",
+                "inet4_range": "198.18.0.0/15",
+                "inet6_range": "fc00::/18"
+            }
+        ],
+        "rules": [
+            {
+                "rule_set": "geolocation-!cn",
+                "query_type": [
+                    "A",
+                    "AAAA"
+                ],
+                "server": "dns_fakeip"
+            },
+            {
+                "rule_set": "geolocation-!cn",
+                "query_type": "CNAME",
+                "server": "dns_proxy"
+            },
+            {
+                "query_type": [
+                    "A",
+                    "AAAA",
+                    "CNAME"
+                ],
+                "invert": true,
+                "action": "predefined",
+                "rcode": "REFUSED"
+            }
+        ],
+        "final": "dns_direct"
+    },
+    "ntp": {
+        "enabled": true,
+        "server": "time.apple.com",
+        "server_port": 123,
+        "interval": "30m"
+    },
+    "inbounds": [
+        {
+            "type": "mixed",
+            "tag": "mixed-in",
+            "listen": "0.0.0.0",
+            "listen_port": 2080
+        },
+        {
+            "tag": "dns-in",
+            "type": "direct",
+            "listen": "::",
+            "listen_port": 1053
+        },
+        {
+            "tag": "redirect-in",
+            "type": "redirect",
+            "listen": "::",
+            "listen_port": 7890
+        },
+        {
+            "tag": "tun-in",
+            "type": "tun",
+            "interface_name": "momo",
+            "address": [
+                "172.31.0.1/30",
+                "fdfe:dcba:9876::1/126"
+            ],
+            "auto_route": false,
+            "auto_redirect": false
+        }
+    ],
+    "outbounds": [
+        {
+            "type": "selector",
+            "tag": "🚀 节点选择",
+            "outbounds": [
+                "DIRECT"
+            ]
+        },
+        {
+            "type": "direct",
+            "tag": "DIRECT"
+        },
+        {
+            "type": "selector",
+            "tag": "🌐 非中国",
+            "outbounds": [
+                "🚀 节点选择",
+                "DIRECT"
+            ]
+        },
+        {
+            "type": "selector",
+            "tag": "🐟 漏网之鱼",
+            "outbounds": [
+                "🚀 节点选择",
+                "DIRECT"
+            ]
+        }
+    ],
+    "route": {
+        "default_domain_resolver": "dns_resolver",
+        "rule_set": [
+            {
+                "tag": "geolocation-!cn",
+                "type": "remote",
+                "format": "binary",
+                "url": "https://gh-proxy.com/https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/sing/geo/geosite/geolocation-!cn.srs",
+                "download_detour": "DIRECT"
+            }
+        ],
+        "rules": [
+            {
+                "action": "sniff"
+            },
+            {
+                "protocol": "dns",
+                "action": "hijack-dns"
+            },
+            {
+                "clash_mode": "direct",
+                "outbound": "DIRECT"
+            },
+            {
+                "clash_mode": "global",
+                "outbound": "🚀 节点选择"
+            },
+            {
+                "rule_set": [
+                    "geolocation-!cn"
+                ],
+                "outbound": "🌐 非中国"
+            }
+        ],
+        "auto_detect_interface": true,
+        "final": "🐟 漏网之鱼"
+    },
+    "experimental": {
+        "cache_file": {
+            "enabled": true,
+            "store_fakeip": true
+        },
+        "clash_api": {
+            "external_controller": "0.0.0.0:9090",
+            "external_ui": "./ui",
+            "external_ui_download_url": "https://gh-proxy.com/https://github.com/Zephyruso/zashboard/archive/refs/heads/gh-pages.zip",
+            "external_ui_download_detour": "DIRECT",
+            "secret": "",
+            "default_mode": "rule"
+        }
+    }
+}
